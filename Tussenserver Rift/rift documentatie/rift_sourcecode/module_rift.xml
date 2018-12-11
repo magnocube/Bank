@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_rift" default="compile.module.rift">
+  <dirname property="module.rift.basedir" file="${ant.file.module_rift}"/>
+  
+  <property name="module.jdk.home.rift" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.rift" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.rift" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.rift" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="rift.output.dir" value="${module.rift.basedir}/out/production/rift"/>
+  <property name="rift.testoutput.dir" value="${module.rift.basedir}/out/test/rift"/>
+  
+  <path id="rift.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="rift.module.production.classpath">
+    <path refid="${module.jdk.classpath.rift}"/>
+    <path refid="library.mysql-connector-java-5.1.41-bin.classpath"/>
+  </path>
+  
+  <path id="rift.runtime.production.module.classpath">
+    <pathelement location="${rift.output.dir}"/>
+    <path refid="library.mysql-connector-java-5.1.41-bin.classpath"/>
+  </path>
+  
+  <path id="rift.module.classpath">
+    <path refid="${module.jdk.classpath.rift}"/>
+    <pathelement location="${rift.output.dir}"/>
+    <path refid="library.mysql-connector-java-5.1.41-bin.classpath"/>
+  </path>
+  
+  <path id="rift.runtime.module.classpath">
+    <pathelement location="${rift.testoutput.dir}"/>
+    <pathelement location="${rift.output.dir}"/>
+    <path refid="library.mysql-connector-java-5.1.41-bin.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.rift">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.rift">
+    <patternset refid="excluded.from.module.rift"/>
+  </patternset>
+  
+  <path id="rift.module.sourcepath">
+    <dirset dir="${module.rift.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.rift" depends="compile.module.rift.production,compile.module.rift.tests" description="Compile module rift"/>
+  
+  <target name="compile.module.rift.production" depends="register.custom.compilers" description="Compile module rift; production classes">
+    <mkdir dir="${rift.output.dir}"/>
+    <javac2 destdir="${rift.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.rift}/javac">
+      <compilerarg line="${compiler.args.rift}"/>
+      <bootclasspath refid="rift.module.bootclasspath"/>
+      <classpath refid="rift.module.production.classpath"/>
+      <src refid="rift.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.rift"/>
+    </javac2>
+    
+    <copy todir="${rift.output.dir}">
+      <fileset dir="${module.rift.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.rift.tests" depends="register.custom.compilers,compile.module.rift.production" description="compile module rift; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.rift" description="cleanup module">
+    <delete dir="${rift.output.dir}"/>
+    <delete dir="${rift.testoutput.dir}"/>
+  </target>
+</project>
